@@ -1,0 +1,178 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/main.layout">
+
+<style type="text/css" layout:fragment="user.embedded.style">
+
+</style>
+<th:block layout:fragment="user.top.script">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.jqueryui.min.css">
+</th:block>
+
+
+<div class="main_inner" layout:fragment="content.north">
+  <div class="main-content-inner">
+    <div class="row">
+      <!-- Primary table start -->
+      <div class="col-12 mt-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="header-title">Containerd Image</h4>
+            <button onclick="goToUpload()">上传</button>
+            <button onclick="deleteImage()">删除</button>
+            <div class="data-tables datatable-primary">
+              <table id="imageTable" class="text-center">
+                <colgroup>
+                  <col style="width: 200px;"/>
+                  <col style="width: 200px;"/>
+                  <col style="width: 200px;"/>
+                  <col style="width: 200px;"/>
+                  <col style="width: 200px;"/>
+                </colgroup>
+                <thead class="text-capitalize">
+                  <tr>
+                    <th>镜像</th>
+                    <th>标签</th>
+                    <th>镜像Id</th>
+                    <th>体积</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Primary table end -->
+    </div>
+  </div>
+</div>
+<th:block layout:fragment="user.embedded.script" th:remove="tag">
+  <script th:src="@{/js/vendor/jquery-2.2.4.min.js}"></script>
+  <!-- bootstrap 4 js -->
+  <script th:src="@{/js/popper.min.js}"></script>
+  <script th:src="@{/js/bootstrap.min.js}"></script>
+  <script th:src="@{/js/owl.carousel.min.js}"></script>
+  <script th:src="@{/js/metisMenu.min.js}"></script>
+  <script th:src="@{/js/jquery.slimscroll.min.js}"></script>
+  <script th:src="@{/js/jquery.slicknav.min.js}"></script>
+
+  <!-- Start datatable js -->
+  <script th:src="@{https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js}"></script>
+  <script th:src="@{https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js}"></script>
+  <script th:src="@{https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap4.min.js}"></script>
+  <script th:src="@{https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js}"></script>
+  <script th:src="@{https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js}"></script>
+  <!-- others plugins -->
+  <script th:src="@{/js/plugins.js}"></script>
+  <script th:src="@{/js/scripts.js}"></script>
+  <script th:src="@{/js/utils.js}"></script>
+  <script type="text/javascript">
+
+    function goToUpload() {
+      console.log("Go to upload page");
+      window.location.href = "/containerd/uploadImage";
+    };
+
+    function deleteImage() {
+      $.ajax({
+        type: 'post',
+        datatype: 'text', // 设置 datatype 为 json
+        url: '/containerd/deleteImage',
+        data: {},
+        success: function (serverData) {
+          // 在 success 回调函数中接收返回的数据
+
+          // var result = JSON.parse(serverData.result)
+
+          console.log(serverData);
+
+          location.reload();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // 处理错误情况
+          console.log('删除 镜像 失败：' + errorThrown);
+        }
+      });
+    };
+
+    $.ajax({
+      type: 'post',
+      datatype: 'json', // 设置 datatype 为 json
+      url: '/containerd/images/list',
+      data: {},
+      success: function (serverData) {
+        // 在 success 回调函数中接收返回的数据
+
+        // var result = JSON.parse(serverData.result)
+
+        console.log(serverData.result);
+
+
+        var dataArray = serverData.result.split('\n'); // 将字符串分割成数组，每个元素是一行数据
+        addDataToTable(dataArray); // 调用 addDataToTable 函数将数据加入表格
+
+
+        // 首先按换行符拆分成多行
+        var lines = serverData.result.split("\n");
+        var jsonArray = [];
+
+        // 将每行数据以空格为分隔符分割成数组，构建 JSON 对象并添加到数组中
+        for (var i = 0; i < lines.length-1; i++) {
+          var rowData = dataArray[i].split(/\s+/);
+
+          var obj = {
+            repository: rowData[0],
+            tag: rowData[1],
+            imageId: rowData[2],
+            size: rowData[3]
+          };
+          jsonArray.push(obj);
+        }
+        // 最终得到的 jsonArray 即为处理后的 JSON 数组
+        var result = JSON.stringify(jsonArray, null, 2);
+        console.log(result);
+
+
+        // window.location.href = '/workload/getPodList';
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        // 处理错误情况
+      }
+    });
+
+    function addDataToTable(dataArray) {
+      var table = document.getElementById('imageTable');
+      var tbody = table.getElementsByTagName('tbody')[0];
+
+      // 清空表格内容
+      tbody.innerHTML = '';
+
+      // 添加新的行
+      for (var i = 0; i < dataArray.length-1; i++) {
+        var rowData = dataArray[i].split(/\s+/); // 将每行数据以空格为分隔符分割成数组
+
+        if (rowData.length === 4) { // 确保每行数据有四列
+          var row = tbody.insertRow();
+          for (var j = 0; j < rowData.length; j++) {
+            var cell = row.insertCell(j);
+            cell.innerHTML = rowData[j];
+          }
+        }
+      }
+    }
+
+
+
+
+
+
+  </script>
+</th:block>
+</html>

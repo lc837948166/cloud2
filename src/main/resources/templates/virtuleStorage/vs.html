@@ -1,0 +1,227 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/main.layout">
+
+<style type="text/css" layout:fragment="user.embedded.style">
+
+</style>
+<th:block layout:fragment="user.top.script">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.jqueryui.min.css">
+</th:block>
+
+
+<div class="main_inner" layout:fragment="content.north">
+    <div class="main-content-inner">
+        <div class="row">
+            <!-- Primary table start -->
+            <div class="col-12 mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title">虚拟存储</h4>
+                        <button onclick="createVs()">上传</button>
+                        <button onclick="deleteVs()">删除</button>
+                        <button onclick="updateVs()">更新</button>
+                            <table id="vsTable" class="text-center">
+                                <colgroup>
+                                    <col style="width: 200px;"/>
+                                    <col style="width: 200px;"/>
+                                    <col style="width: 200px;"/>
+                                    <col style="width: 200px;"/>
+                                    <col style="width: 200px;"/>
+                                    <col style="width: 200px;"/>
+                                    <col style="width: 200px;"/>
+                                </colgroup>
+                                <thead class="text-capitalize">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Capacity</th>
+                                    <th>Access mode</th>
+                                    <th>Recycle Policy</th>
+                                    <th>Status</th>
+                                    <th>Claim</th>
+                                    <th>Storage Class</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Primary table end -->
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="user.embedded.script" th:remove="tag">
+    <script th:src="@{/js/vendor/jquery-2.2.4.min.js}"></script>
+    <!-- bootstrap 4 js -->
+    <script th:src="@{/js/popper.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/js/metisMenu.min.js}"></script>
+    <script th:src="@{/js/jquery.slimscroll.min.js}"></script>
+    <script th:src="@{/js/jquery.slicknav.min.js}"></script>
+
+    <!-- Start datatable js -->
+    <script th:src="@{https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js}"></script>
+    <script th:src="@{https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js}"></script>
+    <script th:src="@{https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap4.min.js}"></script>
+    <script th:src="@{https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js}"></script>
+    <script th:src="@{https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js}"></script>
+    <!-- others plugins -->
+    <script th:src="@{/js/plugins.js}"></script>
+    <script th:src="@{/js/scripts.js}"></script>
+    <script th:src="@{/js/utils.js}"></script>
+    <script type="text/javascript">
+
+        function createVs() {
+            $.ajax({
+                type: 'POST',
+                datatype: 'text', // 设置 datatype 为 json
+                url: '/virtuleStorage/createVs',
+                data: {},
+                success: function (serverData) {
+                    // 在 success 回调函数中接收返回的数据
+
+                    // var result = JSON.parse(serverData.result)
+
+                    console.log(serverData);
+
+                    location.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // 处理错误情况
+                    console.log('添加 VS 失败：' + errorThrown);
+                }
+            });
+        };
+
+        function deleteVs() {
+            $.ajax({
+                type: 'post',
+                datatype: 'text', // 设置 datatype 为 json
+                url: '/virtuleStorage/deleteVs',
+                data: {},
+                success: function (serverData) {
+                    // 在 success 回调函数中接收返回的数据
+
+                    // var result = JSON.parse(serverData.result)
+
+                    console.log(serverData);
+
+                    location.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // 处理错误情况
+                    console.log('删除 VS 失败：' + errorThrown);
+                }
+            });
+        };
+
+        function updateVs() {
+            $.ajax({
+                type: 'post',
+                datatype: 'text', // 设置 datatype 为 json
+                url: '/virtuleStorage/updateVs',
+                data: {},
+                success: function (serverData) {
+                    // 在 success 回调函数中接收返回的数据
+
+                    // var result = JSON.parse(serverData.result)
+
+                    console.log(serverData);
+
+                    location.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // 处理错误情况
+                    console.log('更新 VS 失败：' + errorThrown);
+                }
+            });
+        };
+
+        $.ajax({
+            type: 'get',
+            datatype: 'json', // 设置 datatype 为 json
+            url: '/virtuleStorage/vs/list',
+            data: {},
+            success: function (serverData) {
+                // 在 success 回调函数中接收返回的数据
+
+                var result = JSON.parse(serverData.result)
+
+                console.log(result);
+
+                // 清空表格内容
+                document.getElementById("vsTable").getElementsByTagName('tbody')[0].innerHTML = '';
+
+// 遍历pvlist，将每个持久卷信息填充到表格中
+                result.items.forEach(function(pv) {
+                    var row = document.getElementById("vsTable").insertRow(-1);
+                    var nameCell = row.insertCell(0);
+                    var capacityCell = row.insertCell(1);
+                    var accessModeCell = row.insertCell(2);
+                    var recyclePolicyCell = row.insertCell(3);
+                    var statusCell = row.insertCell(4);
+                    var claimCell = row.insertCell(5);
+                    var storageClassCell = row.insertCell(6);
+
+                    nameCell.innerHTML = pv.metadata.name;
+                    capacityCell.innerHTML = pv.spec.capacity.storage;
+                    accessModeCell.innerHTML = pv.spec.accessModes;
+                    recyclePolicyCell.innerHTML = pv.spec.persistentVolumeReclaimPolicy;
+                    statusCell.innerHTML = pv.status.phase;
+                    claimCell.innerHTML = pv.spec.claimRef.name;
+                    storageClassCell.innerHTML = pv.spec.hostPath.path;
+
+                    // nameCell.innerHTML = pv.getMetadata().getName();
+                    // capacityCell.innerHTML = pv.getSpec().getCapacity();
+                    // accessModeCell.innerHTML = pv.getSpec().AccessModes();
+                    // recyclePolicyCell.innerHTML = pv.RecyclePolicy;
+                    // statusCell.innerHTML = pv.getSpec().getRersistentVolumeReclaimPolicy;
+                    // claimCell.innerHTML = pv.getClaim();
+                    // storageClassCell.innerHTML = pv.getSpec().getStorageClass();
+                });
+
+
+                // window.location.href = '/workload/getPodList';
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                // 处理错误情况
+            }
+        });
+
+        function addDataToTable(dataArray) {
+            var table = document.getElementById('vsTable');
+            var tbody = table.getElementsByTagName('tbody')[0];
+
+            // 清空表格内容
+            tbody.innerHTML = '';
+
+            // 添加新的行
+            for (var i = 0; i < dataArray.length-1; i++) {
+                var rowData = dataArray[i].split(/\s+/); // 将每行数据以空格为分隔符分割成数组
+
+                if (rowData.length === 4) { // 确保每行数据有四列
+                    var row = tbody.insertRow();
+                    for (var j = 0; j < rowData.length; j++) {
+                        var cell = row.insertCell(j);
+                        cell.innerHTML = rowData[j];
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+    </script>
+</th:block>
+</html>
