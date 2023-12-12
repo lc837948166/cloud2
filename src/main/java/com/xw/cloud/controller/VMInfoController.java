@@ -3,13 +3,16 @@ package com.xw.cloud.controller;
 import com.xw.cloud.Utils.CommentResp;
 import com.xw.cloud.bean.VMInfo2;
 import com.xw.cloud.inter.OperationLogDesc;
-import com.xw.cloud.mapper.VMMapper;
+import com.xw.cloud.mapper.VmMapper;
 import com.xw.cloud.service.LibvirtService;
 import io.swagger.annotations.Api;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 
 @Api(tags = "虚拟机信息", description = "提供虚拟机信息")
@@ -19,7 +22,7 @@ import java.util.List;
 public class VMInfoController {
 
     @Resource
-    private VMMapper vmMapper;
+    private VmMapper vmMapper;
 
     @Resource(name = "libvirtService")
     private LibvirtService libvirtService;
@@ -41,17 +44,29 @@ public class VMInfoController {
         }
     }
     //更改用户信息
-    @RequestMapping(value = "/update")
+    @RequestMapping(value = "/updateip/{serverip:.*}",method = RequestMethod.GET)
     @ResponseBody
     @OperationLogDesc(module = "虚拟机信息管理", events = "虚拟机信息更新")
-    public CommentResp update(@RequestBody VMInfo2 temp){
-        System.out.println(temp);
-        int result = vmMapper.updateById(temp);
-        if (result >= 1) {
-            return new CommentResp(true, null,"更新成功");
-        } else {
-            return new CommentResp(false, null,"更新失败");
+    public CommentResp updateip(@PathVariable("serverip") String serverip) throws IOException {
+        String data=libvirtService.getallVMip(serverip);
+        StringReader stringReader = new StringReader(data);
+        BufferedReader reader = new BufferedReader(stringReader);
+        String line;
+        int result = 0;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(":");
+            if (parts.length == 2) {
+                String name = parts[0];
+                String ip = parts[1].trim();
+                if (!ip.isEmpty()) {
+                    VMInfo2 virtualMachine = new VMInfo2();
+                    virtualMachine.setName(name);
+                    virtualMachine.setIp(ip);
+                    result+=vmMapper.updateById(virtualMachine);
+                }
+            }
         }
+            return new CommentResp(true, null,"更新成功");
     }
     //插入用户信息
     @RequestMapping(value = "/insert")
@@ -73,6 +88,8 @@ public class VMInfoController {
         List<VMInfo2> tempList = vmMapper.selectList(null);
         return new CommentResp(true, tempList,"");
     }
+
+
 
 }
 

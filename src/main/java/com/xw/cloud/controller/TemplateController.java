@@ -84,67 +84,70 @@ public class TemplateController {
         return new CommentResp(true, tempList,"");
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/cloneFromTemplate", method = RequestMethod.GET)
-    public CommentResp cloneFromTemplate(@RequestParam("1name") String name,
-                              @RequestParam("clone_name") String clone_name) throws Exception {
-        String virtualMachineIp = "127.0.0.1";
-        String username = "root";
-        String password = "111";
-
-        Session session = null;
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        JSch jsch = new JSch();
-        session = jsch.getSession(username, virtualMachineIp, 22);
-        session.setConfig("StrictHostKeyChecking", "no");
-        session.setPassword(password);
-        session.connect();
-        // 执行命令
-        Channel execChannel = session.openChannel("exec");
-        ((ChannelExec) execChannel).setCommand("virt-clone -o "+name+" -n "+clone_name+" --auto-clone"); // 设置执行的命令
-        InputStream in = null;
-        in = execChannel.getInputStream();  // 获取命令执行结果的输入流
-        execChannel.connect();  // 连接远程执行命令
-        byte[] tmp = new byte[1024];
-        StringBuilder commandOutput = new StringBuilder(); //存储命令执行的输出
-        while (true) {
-            while (in.available() > 0) {
-                int i = in.read(tmp, 0, 1024);
-                if (i < 0) break;
-                commandOutput.append(new String(tmp, 0, i));
-            }
-            if (execChannel.isClosed()) {
-                if (in.available() > 0) continue;
-                break;
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ee) {
-                // 处理异常
-            }
-        }
-        String result=commandOutput.toString();
-        if(result.contains("功")){
-            return new CommentResp(true, null,"克隆成功");
-        }
-        else return new CommentResp(true, null,"克隆虚拟机失败，请检查是否与其他虚拟机名称重复");
-    }
+//    @ResponseBody
+//    @RequestMapping(value = "/cloneFromTemplate", method = RequestMethod.GET)
+//    public CommentResp cloneFromTemplate(@RequestParam("1name") String name,
+//                              @RequestParam("clone_name") String clone_name) throws Exception {
+//        String virtualMachineIp = "127.0.0.1";
+//        String username = "root";
+//        String password = "111";
+//
+//        Session session = null;
+//        ModelAndView modelAndView = new ModelAndView("jsonView");
+//        JSch jsch = new JSch();
+//        session = jsch.getSession(username, virtualMachineIp, 22);
+//        session.setConfig("StrictHostKeyChecking", "no");
+//        session.setPassword(password);
+//        session.connect();
+//        // 执行命令
+//        Channel execChannel = session.openChannel("exec");
+//        ((ChannelExec) execChannel).setCommand("virt-clone -o "+name+" -n "+clone_name+" --auto-clone"); // 设置执行的命令
+//        InputStream in = null;
+//        in = execChannel.getInputStream();  // 获取命令执行结果的输入流
+//        execChannel.connect();  // 连接远程执行命令
+//        byte[] tmp = new byte[1024];
+//        StringBuilder commandOutput = new StringBuilder(); //存储命令执行的输出
+//        while (true) {
+//            while (in.available() > 0) {
+//                int i = in.read(tmp, 0, 1024);
+//                if (i < 0) break;
+//                commandOutput.append(new String(tmp, 0, i));
+//            }
+//            if (execChannel.isClosed()) {
+//                if (in.available() > 0) continue;
+//                break;
+//            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (Exception ee) {
+//                // 处理异常
+//            }
+//        }
+//        String result=commandOutput.toString();
+//        if(result.contains("功")){
+//            return new CommentResp(true, null,"克隆成功");
+//        }
+//        else return new CommentResp(true, null,"克隆虚拟机失败，请检查是否与其他虚拟机名称重复");
+//    }
 
 
     @ResponseBody
     @RequestMapping("/addVirtual")
-    public String addVirtual(@RequestParam("file") MultipartFile file, @RequestParam("vmname") String name,
-                             @RequestParam("memory") int memory, @RequestParam("cpuNum") String cpuNum,
-                             @RequestParam("OStype") String OStype) {
+    public CommentResp addVirtual(@RequestParam("ImgName") String ImgName, @RequestParam("name") String name,
+                                  @RequestParam("memory") int memory, @RequestParam("cpuNum") int cpuNum,
+                                  @RequestParam("OStype") String OStype,@RequestParam("nettype") String NetType,
+                                  @RequestParam("serverip") String serverip) throws InterruptedException {
         VM_create vmc = new VM_create();
-        System.out.println(name);
         vmc.setName(name);
         vmc.setMemory(memory);
-        vmc.setCpuNum(Integer.parseInt(cpuNum));
+        vmc.setCpuNum(cpuNum);
         vmc.setOStype(OStype);
-        libvirtService.addDomainByName(vmc);
-        libvirtService.addImgFile(vmc.getName(), file);
-        return "ok";
+        vmc.setImgName(ImgName);
+        vmc.setNetType(NetType);
+        libvirtService.addImgFile(vmc.getName(),ImgName);
+        libvirtService.addDomainByName(vmc,serverip);
+
+        return new CommentResp(true, null,"创建虚拟机成功");
     }
 }
 

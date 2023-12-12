@@ -5,7 +5,7 @@ import com.xw.cloud.bean.VMInfo2;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface VMMapper extends BaseMapper<VMInfo2> {
+public interface VmMapper extends BaseMapper<VMInfo2> {
 //    int insertTemplate(Template temp);
 //
 //    Template getbyid(int id);

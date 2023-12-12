@@ -142,6 +142,7 @@ public class LibvirtController {
     public CommentResp deleteVirtual(@PathVariable("name") String name) {
         libvirtService.deleteDomainByName(name);
         libvirtService.deleteImgFile(name + ".qcow2");
+
         return new CommentResp(true, null,name+"qcow2删除成功");
     }
 
@@ -153,26 +154,13 @@ public class LibvirtController {
         return "addVirtual";
     }
 
-//    @ResponseBody
-//    @PostMapping(value = "/addVirtual")
-//    public String addVirtual(@RequestParam("file") MultipartFile file, @RequestParam("name") String name,
-//                             @RequestParam("memory") String memory, @RequestParam("cpuNum") String cpuNum,
-//                             @RequestParam("OStype") String OStype) {
-//        VM_create vmc = new VM_create();
-//        vmc.setName(name);
-//        vmc.setMemory(Long.parseLong(memory));
-//        vmc.setCpuNum(Integer.parseInt(cpuNum));
-//        vmc.setOStype(OStype);
-//        libvirtService.addDomainByName(vmc);
-//        libvirtService.addImgFile(vmc.getName(), file);
-//        return "main";
-//    }
     @ApiOperation(value = "添加虚拟机", notes = "根据提供的信息添加新的虚拟机")
     @ResponseBody
     @RequestMapping("/addVirtual")
     public CommentResp addVirtual(@RequestParam("ImgName") String ImgName, @RequestParam("name") String name,
                              @RequestParam("memory") int memory, @RequestParam("cpuNum") int cpuNum,
-                             @RequestParam("OStype") String OStype,@RequestParam("nettype") String NetType) throws InterruptedException {
+                             @RequestParam("OStype") String OStype,@RequestParam("nettype") String NetType,
+                                  @RequestParam("serverip") String serverip) throws InterruptedException {
         VM_create vmc = new VM_create();
         vmc.setName(name);
         vmc.setMemory(memory);
@@ -180,9 +168,8 @@ public class LibvirtController {
         vmc.setOStype(OStype);
         vmc.setImgName(ImgName);
         vmc.setNetType(NetType);
-        libvirtService.addDomainByName(vmc);
-
-//        libvirtService.addImgFile(vmc.getName(), file);
+        libvirtService.addImgFile(vmc.getName(),ImgName);
+        libvirtService.addDomainByName(vmc,serverip);
         return new CommentResp(true, null,"创建虚拟机成功");
     }
 

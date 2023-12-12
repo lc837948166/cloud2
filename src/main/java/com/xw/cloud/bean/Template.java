@@ -16,7 +16,7 @@ import lombok.Data;
  * 虚拟机模板信息
  */
 @Data
-@TableName(value = "VM_Template")
+@TableName(value = "T_CLOUD_VM_TEMPLATE")
 @ApiModel(description = "虚拟机模板信息")
 public class Template {
     @TableId(type = IdType.AUTO)
@@ -35,4 +35,10 @@ public class Template {
     @JsonProperty(value = "OStype")
     @ApiModelProperty(value = "操作系统类型")
     private String OStype;
+    @JsonProperty(value = "ImgName")
+    @ApiModelProperty(value = "镜像名")
+    private String ImgName;
+    @JsonProperty(value = "nettype")
+    @ApiModelProperty(value = "网络类型")
+    private String NetType;
 }

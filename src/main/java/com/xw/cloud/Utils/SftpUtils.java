@@ -16,9 +16,9 @@ public class SftpUtils {
     @SneakyThrows
     public static ChannelSftp getSftpcon() {
 
-            String remoteHost = "192.168.243.145";
+            String remoteHost = "127.0.0.1";
             String username = "root";
-            String password = "806592LClc.";
+            String password = "111";
 
             // 创建 SSH 连接
             JSch jsch = new JSch();
