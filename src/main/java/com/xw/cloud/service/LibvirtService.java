@@ -122,15 +122,33 @@ public class LibvirtService {
     }
 
     @SneakyThrows
-    public String getallVMip(String serverip) {
+    public void getallVMip(String serverip) {
 //        String command = "for mac in `sudo virsh domiflist "+name+" |grep -o -E \"([0-9a-f]{2}:){5}([0-9a-f]{2})\"` ; do arp -e | grep $mac  | grep -o -P \"^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\" ; done";
 //        String ip =SftpUtils.getexecon(command);
         String ip1=findserverip(serverip,'.',3);
         System.out.println(ip1);
         String command="bash /root/VM_place/virsh-ip.sh all "+ip1;
-        String ip =SftpUtils.getexecon(command);
-        return ip;
+        String data =SftpUtils.getexecon(command);
+        StringReader stringReader = new StringReader(data);
+        BufferedReader reader = new BufferedReader(stringReader);
+        String line;
+        int result = 0;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(":");
+            if (parts.length == 2) {
+                String name = parts[0];
+                String ip = parts[1].trim();
+                if (!ip.isEmpty()) {
+                    VMInfo2 virtualMachine = new VMInfo2();
+                    virtualMachine.setName(name);
+                    virtualMachine.setIp(ip);
+                    result+=vmMapper.updateById(virtualMachine);
+                }
+            }
+        }
     }
+
+
 
     public String findserverip(String str, char c, int n) {
         int index = -1;
@@ -482,10 +500,20 @@ public class LibvirtService {
                 "</domain>";
         LibvirtUtils.getConnection().domainDefineXML(xml);    // define ------> creat
         log.info(vmc.getName() + "虚拟机已创建！");
-        Thread.sleep(1000);
+        Thread.sleep(100);
         initiateDomainByName(vmc.getName());
         updateVMtable(vmc.getName(),serverip);
-    }
+        Thread.sleep(1500);
+            getallVMip(serverip);
+            for (int i = 0; i < 4; ++i) {
+                if (vmMapper.selectById(vmc.getName()).getIp().isEmpty()){
+                    Thread.sleep(1500);
+                    getallVMip(serverip);
+                }
+                else break;
+                }
+            }
+
 
     /**
      * 更新数据库的虚拟机信息
@@ -495,7 +523,7 @@ public class LibvirtService {
 
         VMInfo2 vmInfo2=VMInfo2.builder()
                 .name(name)
-                .username("lc")
+                .username("root")
                 .passwd("111")
                 .serverip(serverip).build();
         vmMapper.insert(vmInfo2);

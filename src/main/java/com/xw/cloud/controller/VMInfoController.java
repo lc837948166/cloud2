@@ -48,26 +48,10 @@ public class VMInfoController {
     @ResponseBody
     @OperationLogDesc(module = "虚拟机信息管理", events = "虚拟机信息更新")
     public CommentResp updateip(@PathVariable("serverip") String serverip) throws IOException {
-        String data=libvirtService.getallVMip(serverip);
-        StringReader stringReader = new StringReader(data);
-        BufferedReader reader = new BufferedReader(stringReader);
-        String line;
-        int result = 0;
-        while ((line = reader.readLine()) != null) {
-            String[] parts = line.split(":");
-            if (parts.length == 2) {
-                String name = parts[0];
-                String ip = parts[1].trim();
-                if (!ip.isEmpty()) {
-                    VMInfo2 virtualMachine = new VMInfo2();
-                    virtualMachine.setName(name);
-                    virtualMachine.setIp(ip);
-                    result+=vmMapper.updateById(virtualMachine);
-                }
-            }
-        }
+        libvirtService.getallVMip(serverip);
             return new CommentResp(true, null,"更新成功");
     }
+
     //插入用户信息
     @RequestMapping(value = "/insert")
     @ResponseBody
